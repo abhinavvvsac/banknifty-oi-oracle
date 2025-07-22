@@ -1,53 +1,37 @@
 import streamlit as st
-import pandas_ta as ta
-import time
-import streamlit as st
 import pandas as pd
-import pandas_ta as ta  # 🟢 This will now work
 import numpy as np
 import yfinance as yf
-import plotly.graph_objects as go
-import requests
+import plotly.express as px
+
+# Safe import pandas_ta
+try:
+    import pandas_ta as ta
+    HAS_TA = True
+except Exception:
+    HAS_TA = False
 
 st.set_page_config(page_title="BankNifty OI Oracle", layout="wide")
-st.markdown("<h1 style='text-align:center'>🔮 BankNifty OI Oracle</h1>", unsafe_allow_html=True)
+st.title("📊 BankNifty OI Oracle Dashboard")
 
-mode = st.sidebar.radio("⚙️ सिग्नल मोड", ["Safe", "Aggressive", "Combo"])
-voice_on = st.sidebar.checkbox("🔊 आवाज़ सुनो", True)
-st.sidebar.markdown("Made for Abhinav Sachan")
+st.markdown("#### लाइव डेटा (Demo Mode)")
 
-@st.cache(ttl=60)
-def fetch_data():
-    df = yf.download("^NSEBANK", period="1d", interval="1m")
-    df["EMA9"] = ta.ema(df["Close"], length=9)
-    df["EMA21"] = ta.ema(df["Close"], length=21)
-    # … बाकी आपके लॉजिक यहाँ एड करो …
-    return df
+# Fetch BankNifty 1-minute data
+data = yf.download("^NSEBANK", period="1d", interval="1m")
+if data.empty:
+    st.error("डेटा नहीं मिला, बाद में फिर ट्राई करें।")
+    st.stop()
 
-df = fetch_data()
-st.subheader("📈 Price & Indicators")
-st.line_chart(df[["Close", "EMA9", "EMA21"]])
+# Plot Close Price
+fig = px.line(data, x=data.index, y="Close", title="BankNifty Live Close Price")
+st.plotly_chart(fig, use_container_width=True)
 
-# … सारे वर्किंग फीचर्स इधर एड करो …
+# Add RSI if pandas_ta is available
+if HAS_TA:
+    data["RSI_14"] = ta.rsi(data["Close"], length=14)
+    st.line_chart(data["RSI_14"], height=200, use_container_width=True)
+else:
+    st.warning("Technical indicators load नहीं हुए (pandas_ta): Skipping RSI.")
 
-def compute_verdict(df):
-    last, ema9, ema21 = df["Close"].iloc[-1], df["EMA9"].iloc[-1], df["EMA21"].iloc[-1]
-    if last > ema9 > ema21:
-        return "📈 कॉल लेना सही रहेगा", 85
-    else:
-        return "📉 पुट लेना बेहतर रहेगा", 75
-
-verdict, conf = compute_verdict(df)
-st.markdown(f"## 🔮 अंतिम निर्णय: **{verdict}** (विश्वास: {conf}%)")
-
-if voice_on:
-    st.components.v1.html(f"""
-    <script>
-      let msg = new SpeechSynthesisUtterance("{verdict}");
-      window.speechSynthesis.speak(msg);
-    </script>
-    """, height=0)
-
-# Auto-refresh
-time.sleep(5)
-st.experimental_rerun()
+# Final bias demo
+st.success("🔮 Directional Bias: CALL suggested (Demo Data)", icon="✅")
