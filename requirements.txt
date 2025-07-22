@@ -6,3 +6,5 @@ yfinance
 numpy
 nsepy
 plotly
+requests
+beautifulsoup4
