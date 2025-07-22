@@ -8,3 +8,4 @@ nsepy
 plotly
 requests
 beautifulsoup4
+matplotlib
