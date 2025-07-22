@@ -1,11 +1,8 @@
-setuptools
-pandas_ta
 streamlit
 pandas
-yfinance
+pandas_ta==0.3.14b0
 numpy
-nsepy
+yfinance
 plotly
 requests
-beautifulsoup4
-matplotlib
+
