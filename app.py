@@ -1,8 +1,13 @@
 import streamlit as st
-import pandas as pd
-import yfinance as yf
 import pandas_ta as ta
 import time
+import streamlit as st
+import pandas as pd
+import pandas_ta as ta  # 🟢 This will now work
+import numpy as np
+import yfinance as yf
+import plotly.graph_objects as go
+import requests
 
 st.set_page_config(page_title="BankNifty OI Oracle", layout="wide")
 st.markdown("<h1 style='text-align:center'>🔮 BankNifty OI Oracle</h1>", unsafe_allow_html=True)
